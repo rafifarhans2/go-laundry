@@ -2,7 +2,6 @@ package main
 
 import (
 	"enigma-laundry/config"
-	"enigma-laundry/models"
 	"enigma-laundry/repository"
 	"fmt"
 
@@ -30,8 +29,17 @@ func main() {
 	db := con.Conn()
 
 	uomRepo := repository.NewUomRepository(db)
-	uomRepo.Save(models.Uom{
-		Id:   "1",
-		Name: "Kg",
-	})
+
+	// // SAVE
+	// uomRepo.Save(models.Uom{
+	// 	Id:   "3",
+	// 	Name: "Pair",
+	// })
+
+	// DELETE
+	if err = uomRepo.DeleteById("3"); err != nil {
+		fmt.Println("failed to delete data, try again!", err)
+	} else {
+		fmt.Println("success delete data")
+	}
 }
