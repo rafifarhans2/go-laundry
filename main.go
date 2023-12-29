@@ -2,6 +2,8 @@ package main
 
 import (
 	"enigma-laundry/config"
+	"enigma-laundry/models"
+	"enigma-laundry/repository"
 	"fmt"
 
 	_ "github.com/lib/pq"
@@ -27,23 +29,9 @@ func main() {
 	}
 	db := con.Conn()
 
-	customer := Customer{
-		Id:          "2",
-		Name:        "Buda",
-		PhoneNumber: "08123457",
-		Address:     "Jalan rusak",
-	}
-
-	_, err = db.Exec("INSERT INTO customer VALUES ($1, $2, $3, $4)",
-		customer.Id,
-		customer.Name,
-		customer.PhoneNumber,
-		customer.Address,
-	)
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	fmt.Println("success inserting data")
+	uomRepo := repository.NewUomRepository(db)
+	uomRepo.Save(models.Uom{
+		Id:   "1",
+		Name: "Kg",
+	})
 }
