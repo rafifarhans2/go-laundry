@@ -100,7 +100,7 @@ func (p *productRepository) Save(product models.Product) error {
 
 // Update implements ProductRepository.
 func (p *productRepository) Update(product models.Product) error {
-	_, err := p.db.Exec("UPDATE product SET name = $2 WHERE id = $1", product.Id, product.Name)
+	_, err := p.db.Exec("UPDATE product SET name = $2, price = $3, uom_id = $4 WHERE id = $1", product.Id, product.Name, product.Price, product.Uom.Id)
 	if err != nil {
 		return err
 	}
