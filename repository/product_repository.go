@@ -9,6 +9,7 @@ type ProductRepository interface {
 	Save(product models.Product) error
 	FindById(id string) (models.Product, error)
 	FindAll() ([]models.Product, error)
+	FindByName(name string) ([]models.Product, error)
 	Update(product models.Product) error
 	DeleteById(id string) error
 }
@@ -27,35 +28,65 @@ func (p *productRepository) DeleteById(id string) error {
 
 // FindAll implements ProductRepository.
 func (p *productRepository) FindAll() ([]models.Product, error) {
-	rows, err := p.db.Query("SELECT * FROM product")
-
-	var product []models.Product
-
+	row, err := p.db.Query(`SELECT p.id, p.name, p.price, u.id, u.name FROM product p JOIN uom u ON u.id = p.uom_id`)
 	if err != nil {
 		return nil, err
 	}
-
-	for rows.Next() {
-		var products models.Product
-		if err := rows.Scan(&products.Id, &products.Name, &products.Price, &products.Uom.Id); err != nil {
+	var products []models.Product
+	for row.Next() {
+		product := models.Product{}
+		err := row.Scan(
+			&product.Id,
+			&product.Name,
+			&product.Price,
+			&product.Uom.Id,
+			&product.Uom.Name,
+		)
+		if err != nil {
 			return nil, err
 		}
-		product = append(product, products)
 	}
-	return product, nil
-
+	return products, nil
 }
 
 // FindById implements ProductRepository.
 func (p *productRepository) FindById(id string) (models.Product, error) {
-	row := p.db.QueryRow("SELECT id, name FROM product WHERE id = $1", id)
-
-	var product models.Product
-	if err := row.Scan(&product.Id, &product.Name); err != nil {
+	row := p.db.QueryRow(`SELECT p.id, p.name, p.price, u.id, u.name FROM product p JOIN uom u ON u.id = p.uom_id WHERE id = $1`, id)
+	product := models.Product{}
+	err := row.Scan(
+		&product.Id,
+		&product.Name,
+		&product.Price,
+		&product.Uom.Id,
+		&product.Uom.Name,
+	)
+	if err != nil {
 		return models.Product{}, err
 	}
 	return product, nil
+}
 
+// FindByName implements ProductRepository.
+func (p *productRepository) FindByName(name string) ([]models.Product, error) {
+	row, err := p.db.Query(`SELECT p.id, p.name, p.price, u.id, u.name FROM product p JOIN uom u ON u.id = p.uom_id WHERE name ILIKE '%$1%'`, name)
+	if err != nil {
+		return nil, err
+	}
+	var products []models.Product
+	for row.Next() {
+		product := models.Product{}
+		err := row.Scan(
+			&product.Id,
+			&product.Name,
+			&product.Price,
+			&product.Uom.Id,
+			&product.Uom.Name,
+		)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return products, nil
 }
 
 // Save implements ProductRepository.
