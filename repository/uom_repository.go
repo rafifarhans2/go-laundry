@@ -70,7 +70,6 @@ func (u *uomRepository) Update(uom models.Uom) error {
 		return err
 	}
 	return nil
-
 }
 
 // Constructor
